@@ -1131,6 +1131,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>The default implementation checks the {@link #isActive() 'active'} status
 	 * of this context overall. May be overridden for more specific checks, or for a
 	 * no-op if {@link #getBeanFactory()} itself throws an exception in such a case.
+	 *
+	 * 断言此上下文的BeanFactory当前是活动的，如果它没处于激活状态则会抛出一个非法状态异常。
+	 * 由依赖于活动上下文的所有BeanFactory委托方法调用，特别是所有bean访问器方法。
+	 * 默认实现检查整个上下文的“active”状态。
+	 * 对于更具体的检查，或者对于no-op，如果在这种情况下自身抛出异常，则可以重写。
 	 */
 	protected void assertBeanFactoryActive() {
 		if (!this.active.get()) {

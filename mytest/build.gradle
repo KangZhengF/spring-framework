@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.3.10-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    compile(project(":spring-beans"))
+    compile(project(":spring-context"))
+//    compile(project(":spring-aop"))
+//    compile(project(":spring-core"))
+//    compile(project(":spring-expression"))
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+}
+
+test {
+    useJUnitPlatform()
+}

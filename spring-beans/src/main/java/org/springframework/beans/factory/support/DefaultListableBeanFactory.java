@@ -1216,8 +1216,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) throws BeansException {
 
 		Assert.notNull(requiredType, "Required type must not be null");
+		//获取类型获取bean的name，可能会存在多个，所以返回一个数组
 		String[] candidateNames = getBeanNamesForType(requiredType);
 
+		//如果候选者的名字不止1个
 		if (candidateNames.length > 1) {
 			List<String> autowireCandidates = new ArrayList<>(candidateNames.length);
 			for (String beanName : candidateNames) {
@@ -1229,11 +1231,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				candidateNames = StringUtils.toStringArray(autowireCandidates);
 			}
 		}
-
+		//如果该类的名字的候选者只有一个
 		if (candidateNames.length == 1) {
 			return resolveNamedBean(candidateNames[0], requiredType, args);
 		}
 		else if (candidateNames.length > 1) {
+			//如果该类的名字候选者不止一个
 			Map<String, Object> candidates = CollectionUtils.newLinkedHashMap(candidateNames.length);
 			for (String beanName : candidateNames) {
 				if (containsSingleton(beanName) && args == null) {
@@ -1266,6 +1269,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return null;
 	}
 
+	/**
+	 *
+	 * @param beanName bean的名字
+	 * @param requiredType bean所属的类型
+	 * @param args 参数数组
+	 * @param <T>
+	 * @return
+	 * @throws BeansException
+	 */
 	@Nullable
 	private <T> NamedBeanHolder<T> resolveNamedBean(
 			String beanName, ResolvableType requiredType, @Nullable Object[] args) throws BeansException {

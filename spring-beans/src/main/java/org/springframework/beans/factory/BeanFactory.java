@@ -124,6 +124,25 @@ public interface BeanFactory {
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
+	 *
+	 * 用于取消引用 {@link FactoryBean} 实例并将其与 FactoryBean <i>created<i> 的 bean 区分开来。
+	 * 例如: 我们现在有一个这样定义的类：
+	 * Class MyJndiObject implements FactoryBean {
+	 * 		public JndiObject getObject() throws Exception {
+	 * 		 	return new JndiObject();
+	 * 		}
+	 * }
+	 * 		把这个类注册进Spring容器中，然后我们从容器中去getBean()
+	 * 	情况1： 	MyJndiObject myJndiObject = context.getBean("&myJndiObject");
+	 * 	情况2：	JndiObject jndiObj = context.getBean("myJndiObject");
+	 *
+	 * 尽管上面的代码可能不太规范，但是依然能够说明问题了。
+	 * 注意到获取bean的名称只是有没有&的区别，却返回了两个不同类的对象。
+	 * 这两个对象的区别就是，一个是制造A对象工厂，一个就是返回的A对象。
+	 *
+	 * 而这个 & 的作用就是为了区别标识两个实例对象的。
+	 *
+	 * 详情可见笔者的《Spring中获取Bean的方式》一文
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
