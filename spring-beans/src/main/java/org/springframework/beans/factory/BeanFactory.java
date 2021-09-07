@@ -158,6 +158,12 @@ public interface BeanFactory {
 	 * @return an instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
 	 * @throws BeansException if the bean could not be obtained
+	 *
+	 * 返回一个指定bean的实例，可能是共享的（singleton）也可能是独立的（prototype）。
+	 * 此方法允许使用 Spring BeanFactory 作为单例或原型设计模式的替代品。
+	 * 在单例 bean 的情况下，调用者可以保留对返回对象的引用。
+	 * 将别名翻译回相应的规范 bean 名称。
+	 * 如果在这个工厂实例中找不到bean，会询问父工厂。
 	 */
 	Object getBean(String name) throws BeansException;
 
@@ -175,6 +181,18 @@ public interface BeanFactory {
 	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
+	 *
+	 * 返回一个指定的 bean 实例，可能是共享的，也可能是独立的。
+	 * 行为（效果）与 {@link getBean(String)} 相同，但是却提供了一种类型安全的措施，
+	 * 就是如果 bean 不是所需类型，则会抛出 BeanNotOfRequiredTypeException 异常。
+	 * 这意味着在正确进行强制类型转换时不会抛出 ClassCastException，
+	 * 但是 {@link getBean(String)} 可能会抛出此异常。
+	 *
+	 * 将别名翻译回相应的规范 bean 名称。
+	 * 如果在这个工厂实例中找不到bean，会询问父工厂。
+	 *
+	 * requiredType 返回的bean必须匹配的类型，可以是接口也可以是父类。
+	 *
 	 */
 	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
 
@@ -191,6 +209,13 @@ public interface BeanFactory {
 	 * the affected bean isn't a prototype
 	 * @throws BeansException if the bean could not be created
 	 * @since 2.5
+	 *
+	 * 返回指定 bean 的一个实例，该实例可以是共享的，也可以是独立的。
+	 * 允许显式的指定构造器参数或者工厂方法参数，如果bean定义中有指定的默认参数，则会被覆盖。
+	 *
+	 * args 使用显式参数创建 bean 实例时使用的参数
+	 *（仅在创建新实例时应用，检索现有实例时不会使用这些参数）
+	 *
 	 */
 	Object getBean(String name, Object... args) throws BeansException;
 
@@ -207,6 +232,10 @@ public interface BeanFactory {
 	 * @throws BeansException if the bean could not be created
 	 * @since 3.0
 	 * @see ListableBeanFactory
+	 *
+	 * 返回与给定对象类型唯一匹配的 bean 实例（如果有）。
+	 * 此方法进入 {@link ListableBeanFactory} 按类型查找领域，但也可以根据给定类型的名称转换为传统的按名称查找。
+	 * 对于跨 bean 集的更广泛的检索操作，请使用 {@link ListableBeanFactory} 和或 {@link BeanFactoryUtils}。
 	 */
 	<T> T getBean(Class<T> requiredType) throws BeansException;
 
@@ -237,6 +266,8 @@ public interface BeanFactory {
 	 * @return a corresponding provider handle
 	 * @since 5.1
 	 * @see #getBeanProvider(ResolvableType)
+	 *
+	 * 返回指定 bean 的提供者，允许懒加载按需检索实例，包括可用性和唯一性选项。
 	 */
 	<T> ObjectProvider<T> getBeanProvider(Class<T> requiredType);
 
@@ -253,6 +284,11 @@ public interface BeanFactory {
 	 * @see ObjectProvider#iterator()
 	 * @see ObjectProvider#stream()
 	 * @see ObjectProvider#orderedStream()
+	 *
+	 * 返回指定 bean 的提供者引用，允许懒加载按需检索实例，包括可用性和唯一性选项。
+	 * bean 必须和给定类型匹配；可以是泛型类型声明。请注意，与反射注入点相比，此处不支持集合类型。
+	 * 要以编程方式检索与特定类型匹配的 bean 列表，请在此处指定实际 bean 类型作为参数，
+	 * 然后使用 {@link ObjectProvider#orderedStream()} 或其惰性流或者迭代选项。
 	 */
 	<T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType);
 
@@ -270,6 +306,16 @@ public interface BeanFactory {
 	 * will be able to obtain an instance for the same name.
 	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is present
+	 *
+	 * 这个 bean 工厂是否包含具有给定名称的 bean 定义或已经在外部注册过的单例实例？
+	 *
+	 * 如果给定的名称是别名，它将被翻译回相应的规范 bean 名称。
+	 *
+	 * 如果这个工厂是有层次结构的（继承的），并且在这个工厂实例中找不到bean，则会在任何父工厂查找。
+	 *
+	 * 如果找到与给定名称匹配的 bean 定义或单例实例，
+	 * 无论指定的 bean 定义是具体的还是抽象的、惰性的还是急切的、是否是范围内的，都将返回 true。
+	 * 因此，请注意，此方法返回的 true 并不一定表示 {@link #getBean} 将能够获取同名的实例。
 	 */
 	boolean containsBean(String name);
 
@@ -287,6 +333,14 @@ public interface BeanFactory {
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @see #getBean
 	 * @see #isPrototype
+	 *
+	 * 这个bean 是共享的单例吗？也就是说，getBean()方法是否总是会返回同一个实例？
+	 * 请注意：该方法返回 false 并不明确表示这个实例就是独立的实例。
+	 * 它只能表示这个 bean 是一个 非单例的实例，也可能对应于限定范围内的bean。
+	 * 应该使用 isPrototype() 方法去显示检查这个实例是不是独立实例。
+	 * 别名将会被转换成符合规范的 bean 名称。
+	 * 如果在当前工厂实例中找不到bean，则会在父工厂中查找。
+	 *
 	 */
 	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
 
@@ -322,6 +376,11 @@ public interface BeanFactory {
 	 * @since 4.2
 	 * @see #getBean
 	 * @see #getType
+	 *
+	 * 检查具有给定名称的 bean 是否与指定的类型匹配。
+	 * 更具体地说，检查对给定名称的 {@link #getBean} 调用是否会返回可分配给指定目标类型的对象。
+	 * 别名将会被转换成符合规范的 bean 名称。
+	 * 如果在当前工厂实例中找不到bean，则会在父工厂中查找。
 	 */
 	boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException;
 
@@ -356,6 +415,17 @@ public interface BeanFactory {
 	 * @since 1.1.2
 	 * @see #getBean
 	 * @see #isTypeMatch
+	 *
+	 * 确定给定名称的 bean 的类型。
+	 * 更具体地说，确定 {@link #getBean} 将为给定名称返回的对象类型。
+	 *
+	 * 对于 {@link FactoryBean}，返回由 FactoryBean 创建的对象的类型，
+	 * 也就是 {@link FactoryBean#getObjectType()} 返回的类型。
+	 *
+	 * 这可能会导致之前未初始化的 {@code FactoryBean} 的初始化
+	 * （请参阅 {@link #getType(String, boolean)}）。
+	 * 将别名翻译回相应的规范 bean 名称。
+	 * 如果在这个工厂实例中找不到bean，会询问父工厂。
 	 */
 	@Nullable
 	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
@@ -377,6 +447,17 @@ public interface BeanFactory {
 	 * @since 5.2
 	 * @see #getBean
 	 * @see #isTypeMatch
+	 *
+	 * 返回给定名称的 bean 的所属的类型。
+	 * 更具体的说，确定 geanBean()方法根据指定名称将会返回的bean的类型。
+	 * 对于 FactoryBean 接口，将会返回 FactoryBean 创建的对象的类型。
+	 * 也就是 {@link FactoryBean#getObjectType()} 返回的类型。
+	 *
+	 * 依赖于 {@code allowFactoryBeanInit} 标志的值，
+	 * 如果没有可用的早期类型信息，这可能会导致先前未初始化的 {@code FactoryBean} 的初始化。
+	 *
+	 * 将会把别名转换成符合规范的名称。
+	 * 如果当前工厂中找不到实例，则会查看父类中是否存在实例。
 	 */
 	@Nullable
 	Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException;
@@ -391,6 +472,11 @@ public interface BeanFactory {
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
 	 * @see #getBean
+	 *
+	 * 如果有别名，将会返回给定 bean 名称的别名。
+	 * 在 {@link #getBean} 调用中使用时，所有这些别名都指向同一个 bean。
+	 * 如果给定的名称是别名，则返回对应的原始 bean 名称和其他别名（如果有），原始 bean 名称是数组中的第一个元素。
+	 * 如果在这个工厂实例中找不到bean，会询问父工厂。
 	 */
 	String[] getAliases(String name);
 
