@@ -1270,13 +1270,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 *
+	 * 解析命名的bean
 	 * @param beanName bean的名字
 	 * @param requiredType bean所属的类型
 	 * @param args 参数数组
-	 * @param <T>
-	 * @return
-	 * @throws BeansException
 	 */
 	@Nullable
 	private <T> NamedBeanHolder<T> resolveNamedBean(

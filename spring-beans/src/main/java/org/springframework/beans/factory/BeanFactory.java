@@ -125,7 +125,7 @@ public interface BeanFactory {
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
 	 *
-	 * 用于取消引用 {@link FactoryBean} 实例并将其与 FactoryBean <i>created<i> 的 bean 区分开来。
+	 * 用于取消引用 {@link FactoryBean} 实例并将其与 FactoryBean 创建的 的 bean 区分开来。
 	 * 例如: 我们现在有一个这样定义的类：
 	 * Class MyJndiObject implements FactoryBean {
 	 * 		public JndiObject getObject() throws Exception {
